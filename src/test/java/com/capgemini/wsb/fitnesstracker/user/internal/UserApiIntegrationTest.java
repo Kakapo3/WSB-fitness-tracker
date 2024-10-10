@@ -185,7 +185,6 @@ class UserApiIntegrationTest extends IntegrationTestBase {
                 }
                 """.formatted(
                 USER_NAME,
-
                 USER_LAST_NAME,
                 USER_BIRTHDATE,
                 USER_EMAIL);

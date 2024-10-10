@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,5 +41,17 @@ class UserServiceImpl implements UserService, UserProvider {
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
+
+    @Override
+    public void deleteUser(Long userId) {
+        log.info("Deleting User {}", userId);
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    public List<User> getOlderUsers(LocalDate date) {
+        return userRepository.getUsersByBirthdateLessThan(date);
+    }
+
 
 }
