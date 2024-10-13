@@ -1,5 +1,7 @@
 package com.capgemini.wsb.fitnesstracker.user.internal;
 
+import com.capgemini.wsb.fitnesstracker.training.api.Training;
+import com.capgemini.wsb.fitnesstracker.training.internal.TrainingRepository;
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 import com.capgemini.wsb.fitnesstracker.user.api.UserProvider;
 import com.capgemini.wsb.fitnesstracker.user.api.UserService;
@@ -17,6 +19,7 @@ import java.util.Optional;
 class UserServiceImpl implements UserService, UserProvider {
 
     private final UserRepository userRepository;
+    private final TrainingRepository trainingRepository;
 
     @Override
     public User createUser(final User user) {
@@ -45,6 +48,8 @@ class UserServiceImpl implements UserService, UserProvider {
     @Override
     public void deleteUser(Long userId) {
         log.info("Deleting User {}", userId);
+        List<Training> trainings = trainingRepository.findAllByUserId(userId);
+        trainingRepository.deleteAll(trainings);
         userRepository.deleteById(userId);
     }
 
