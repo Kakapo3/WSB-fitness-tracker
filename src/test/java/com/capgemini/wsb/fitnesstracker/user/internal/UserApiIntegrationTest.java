@@ -72,6 +72,7 @@ class UserApiIntegrationTest extends IntegrationTestBase {
     void shouldReturnDetailsAboutUser_whenGettingUserById() throws Exception {
         User user1 = existingUser(generateUser());
 
+
         mockMvc.perform(get("/v1/users/{id}", user1.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isOk())
@@ -91,7 +92,7 @@ class UserApiIntegrationTest extends IntegrationTestBase {
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(user1.getId().intValue()))
+                .andExpect(jsonPath("$[0].Id").value(user1.getId().intValue()))
                 .andExpect(jsonPath("$[0].email").value(user1.getEmail()));
     }
 
@@ -200,6 +201,18 @@ class UserApiIntegrationTest extends IntegrationTestBase {
         assertThat(user.getLastName()).isEqualTo(USER_LAST_NAME);
         assertThat(user.getBirthdate()).isEqualTo(LocalDate.parse(USER_BIRTHDATE));
         assertThat(user.getEmail()).isEqualTo(USER_EMAIL);
+    }
+
+    @Test
+    void shouldReturnDetailsAboutUser_whenGettingUserByEmailLike() throws Exception {
+        User user1 = existingUser(generateUser());
+
+        mockMvc.perform(get("/v1/users/emailLike").param("emailLike", user1.getEmail().substring(3, 7)).contentType(MediaType.APPLICATION_JSON))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].Id").value(user1.getId().intValue()))
+                .andExpect(jsonPath("$[0].email").value(user1.getEmail()));
     }
 
     public static User generateUser() {

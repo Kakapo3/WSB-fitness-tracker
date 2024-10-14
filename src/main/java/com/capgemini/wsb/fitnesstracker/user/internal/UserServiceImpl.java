@@ -36,8 +36,13 @@ class UserServiceImpl implements UserService, UserProvider {
     }
 
     @Override
-    public Optional<User> getUserByEmail(final String email) {
+    public List<User> getUserByEmail(final String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public List<User> getUserByEmailLike(String email) {
+        return userRepository.findByEmailLike(email);
     }
 
     @Override
@@ -58,5 +63,8 @@ class UserServiceImpl implements UserService, UserProvider {
         return userRepository.getUsersByBirthdateLessThan(date);
     }
 
-
+    @Override
+    public User updateUser(Long id, User user) {
+        return userRepository.updateUser(id, user);
+    }
 }
