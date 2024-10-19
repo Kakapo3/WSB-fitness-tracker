@@ -45,8 +45,8 @@ class UserController {
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return userService.updateUser(id, userMapper.toEntity(userDto));
+    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return userMapper.toDto(userService.updateUser(id, userMapper.toEntity(userDto)));
     }
 
     @GetMapping("/email")
@@ -77,10 +77,10 @@ class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody UserDto userDto) throws InterruptedException {
+    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) throws InterruptedException {
 
         System.out.println("User with e-mail: " + userDto.email() + "passed to the request");
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userMapper.toEntity(userDto)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(userService.createUser(userMapper.toEntity(userDto))));
     }
 
 }
