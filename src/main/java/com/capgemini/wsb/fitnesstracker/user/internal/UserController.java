@@ -1,8 +1,8 @@
 package com.capgemini.wsb.fitnesstracker.user.internal;
 
 import com.capgemini.wsb.fitnesstracker.user.api.User;
+import com.capgemini.wsb.fitnesstracker.user.api.UserDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -77,7 +77,7 @@ class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) throws InterruptedException {
+    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
 
         System.out.println("User with e-mail: " + userDto.email() + "passed to the request");
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(userService.createUser(userMapper.toEntity(userDto))));
