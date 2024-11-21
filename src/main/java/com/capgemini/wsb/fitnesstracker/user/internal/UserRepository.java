@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     }
 
     List<User> getUsersByBirthdateLessThan(LocalDate birthdate);
+
+    User getUserById(Long id);
 }

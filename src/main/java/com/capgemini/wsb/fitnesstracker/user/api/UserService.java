@@ -10,6 +10,8 @@ import java.util.Optional;
  */
 public interface UserService {
 
+    User getUserById(Long id);
+
     User createUser(User user);
 
     void deleteUser(Long userId);

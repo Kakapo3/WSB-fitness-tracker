@@ -23,6 +23,11 @@ class UserServiceImpl implements UserService, UserProvider {
     private final TrainingRepository trainingRepository;
 
     @Override
+    public User getUserById(Long id) {
+        return userRepository.getUserById(id);
+    }
+
+    @Override
     public User createUser(final User user) {
         log.info("Creating User {}", user);
         if (user.getId() != null) {

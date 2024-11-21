@@ -4,6 +4,7 @@ import com.capgemini.wsb.fitnesstracker.training.api.Training;
 import com.capgemini.wsb.fitnesstracker.training.api.TrainingProvider;
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 import com.capgemini.wsb.fitnesstracker.user.internal.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,16 @@ public class TrainingServiceImpl implements TrainingProvider {
     @Override
     public List<Training> getTrainingsByEndTime(Date endTime) {
         return trainingRepository.findAllByEndTimeIsAfter(endTime);
+    }
+
+    @Override
+    public List<Training> getAllTrainingsByActivityType(ActivityType activity) {
+        return trainingRepository.getAllTrainingsByActivityType(activity);
+    }
+
+    @Override
+    public Training createTraining(Training training) {
+        return trainingRepository.save(training);
     }
 
 }

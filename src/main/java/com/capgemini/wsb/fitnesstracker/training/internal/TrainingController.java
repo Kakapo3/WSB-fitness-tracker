@@ -1,11 +1,16 @@
 package com.capgemini.wsb.fitnesstracker.training.internal;
 
 import com.capgemini.wsb.fitnesstracker.training.api.TrainingDTO;
+import com.capgemini.wsb.fitnesstracker.training.api.TrainingNoUserDTO;
+import com.capgemini.wsb.fitnesstracker.user.api.User;
+import com.capgemini.wsb.fitnesstracker.user.api.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.ServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,6 +24,7 @@ class TrainingController {
 
     private final TrainingServiceImpl trainingService;
     private final TrainingMapper trainingMapper;
+    private final UserService userService;
 
     @GetMapping
     public List<TrainingDTO> getAllTrainings() {
@@ -29,7 +35,7 @@ class TrainingController {
     }
 
     @GetMapping("/{userId}")
-    public List<TrainingDTO> getAllTrainingsForUser(@PathVariable  Long userId) {
+    public List<TrainingDTO> getAllTrainingsForUser(@PathVariable Long userId) {
         return trainingService.getAllTrainingsForUser(userId)
                 .stream()
                 .map(trainingMapper::toDto)
@@ -46,5 +52,21 @@ class TrainingController {
                 .toList();
     }
 
+    @GetMapping("/type/{activity}")
+    public List<TrainingDTO> getAllTrainingsByActivityType(@PathVariable String activity) {
+        return trainingService.getAllTrainingsByActivityType(ActivityType.valueOf(activity.toUpperCase()))
+                .stream()
+                .map(trainingMapper::toDto)
+                .toList();
+    }
+
+    @PostMapping
+    public ResponseEntity<TrainingDTO> addTraining(@RequestBody TrainingNoUserDTO trainingDtoNoUser) {
+        User user = userService.getUserById(trainingDtoNoUser.getUser_id());
+        TrainingDTO trainingDto = trainingMapper.toDtoWithUser(trainingDtoNoUser, user);
+        System.out.println("Created " + trainingDto.getActivityType() + " for user " + trainingDto.getUser().firstName());
+        System.out.println(trainingDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(trainingService.createTraining(trainingMapper.toEntity(trainingDto))));
+    }
 
 }

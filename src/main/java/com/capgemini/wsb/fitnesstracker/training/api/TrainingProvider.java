@@ -1,5 +1,6 @@
 package com.capgemini.wsb.fitnesstracker.training.api;
 
+import com.capgemini.wsb.fitnesstracker.training.internal.ActivityType;
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 
 import java.util.Date;
@@ -23,4 +24,7 @@ public interface TrainingProvider {
 
     List<Training> getTrainingsByEndTime(Date endTime);
 
+    List<Training> getAllTrainingsByActivityType(ActivityType activity);
+
+    Training createTraining(Training training);
 }
