@@ -1,10 +1,12 @@
 package com.capgemini.wsb.fitnesstracker.training.internal;
 
+import com.capgemini.wsb.fitnesstracker.training.api.Training;
 import com.capgemini.wsb.fitnesstracker.training.api.TrainingDTO;
 import com.capgemini.wsb.fitnesstracker.training.api.TrainingNoUserDTO;
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 import com.capgemini.wsb.fitnesstracker.user.api.UserService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.ServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,16 @@ import java.util.List;
 @RequiredArgsConstructor
 class TrainingController {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final TrainingServiceImpl trainingService;
     private final TrainingMapper trainingMapper;
     private final UserService userService;
+
+    public boolean isManaged(User user) {
+        return entityManager.contains(user);
+    }
 
     @GetMapping
     public List<TrainingDTO> getAllTrainings() {
@@ -44,8 +53,23 @@ class TrainingController {
 
     @GetMapping("/finished/{date}")
     public List<TrainingDTO> getAllTrainingsFinishedAfterTime(@PathVariable String date) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+00:00");
-        Date endDate = sdf.parse(date);
+        String[] formats = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00", // Full date-time with timezone
+                "yyyy-MM-dd"                   // Just the date
+        };
+
+        Date endDate = null;
+        for (String format : formats) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(format);
+                endDate = sdf.parse(date);
+            } catch (ParseException ignored) {}
+        }
+
+        if (endDate == null) {
+            throw new ParseException(date, 0);
+        }
+
         return trainingService.getTrainingsByEndTime(endDate)
                 .stream()
                 .map(trainingMapper::toDto)
@@ -63,10 +87,23 @@ class TrainingController {
     @PostMapping
     public ResponseEntity<TrainingDTO> addTraining(@RequestBody TrainingNoUserDTO trainingDtoNoUser) {
         User user = userService.getUserById(trainingDtoNoUser.getUser_id());
+        if (user == null) { throw new EntityNotFoundException("User with ID " + trainingDtoNoUser.getUser_id() + " not found."); }
         TrainingDTO trainingDto = trainingMapper.toDtoWithUser(trainingDtoNoUser, user);
         System.out.println("Created " + trainingDto.getActivityType() + " for user " + trainingDto.getUser().firstName());
         System.out.println(trainingDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(trainingService.createTraining(trainingMapper.toEntity(trainingDto))));
+        Training training = trainingMapper.toEntity(trainingDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(trainingService.createTraining(training)));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<TrainingDTO> updateTraining(@PathVariable Long id, @RequestBody TrainingNoUserDTO trainingDtoNoUser) {
+        User user = null;
+        if (trainingDtoNoUser.getUser_id() != null) {
+            user = userService.getUserById(trainingDtoNoUser.getUser_id());
+        }
+        TrainingDTO trainingDto = trainingMapper.toDtoWithUser(trainingDtoNoUser, user);
+        System.out.println(trainingDto);
+        Training training = trainingMapper.toEntity(trainingDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(trainingService.updateTraining(id, training)));
+    }
 }

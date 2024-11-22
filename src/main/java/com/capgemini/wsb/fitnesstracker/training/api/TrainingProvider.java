@@ -27,4 +27,6 @@ public interface TrainingProvider {
     List<Training> getAllTrainingsByActivityType(ActivityType activity);
 
     Training createTraining(Training training);
+
+    Training updateTraining(Long id, Training training);
 }

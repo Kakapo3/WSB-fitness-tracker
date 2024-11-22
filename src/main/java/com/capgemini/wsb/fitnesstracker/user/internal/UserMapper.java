@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public UserDto toDto(User user) {
-        return new UserDto(user.getId(),
-                           user.getFirstName(),
-                           user.getLastName(),
-                           user.getBirthdate(),
-                           user.getEmail());
+        return new UserDto(
+                user != null ? user.getId() : null,
+                user != null && user.getFirstName() != null ? user.getFirstName() : null,
+                user != null && user.getLastName() != null ? user.getLastName() : null,
+                user != null ? user.getBirthdate() : null,
+                user != null && user.getEmail() != null ? user.getEmail() : null
+        );
     }
 
     public User toEntity(UserDto userDto) {

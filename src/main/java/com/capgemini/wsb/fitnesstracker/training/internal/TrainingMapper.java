@@ -25,13 +25,13 @@ public class TrainingMapper {
     TrainingDTO toDto(Training training) {
         return new TrainingDTO(
                 training.getId(),
-                userMapper.toDto(training.getUser()),
+                training.getUser() != null ? userMapper.toDto(training.getUser()) : null,
                 training.getStartTime(),
                 training.getEndTime(),
-                training.getActivityType(),
-                training.getDistance(),
-                training.getAverageSpeed()
-                );
+                training.getActivityType() != null ? training.getActivityType() : null,
+                training.getDistance() != 0.0 ? training.getDistance() : 0.0,
+                training.getAverageSpeed() != 0.0 ? training.getAverageSpeed() : 0.0
+        );
     }
 
     Training toEntity(TrainingDTO trainingDTO) {
