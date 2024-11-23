@@ -5,10 +5,10 @@ import com.capgemini.wsb.fitnesstracker.training.api.TrainingDTO;
 import com.capgemini.wsb.fitnesstracker.training.api.TrainingNoUserDTO;
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 import com.capgemini.wsb.fitnesstracker.user.api.UserService;
+import com.capgemini.wsb.fitnesstracker.user.internal.UserMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.ServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 class TrainingController {
 
+    private final UserMapper userMapper;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -86,24 +87,30 @@ class TrainingController {
 
     @PostMapping
     public ResponseEntity<TrainingDTO> addTraining(@RequestBody TrainingNoUserDTO trainingDtoNoUser) {
-        User user = userService.getUserById(trainingDtoNoUser.getUser_id());
-        if (user == null) { throw new EntityNotFoundException("User with ID " + trainingDtoNoUser.getUser_id() + " not found."); }
-        TrainingDTO trainingDto = trainingMapper.toDtoWithUser(trainingDtoNoUser, user);
-        System.out.println("Created " + trainingDto.getActivityType() + " for user " + trainingDto.getUser().firstName());
-        System.out.println(trainingDto);
+        User user = userService.getUserById(trainingDtoNoUser.getUserId());
+        if (user == null) { throw new EntityNotFoundException("User with ID " + trainingDtoNoUser.getUserId() + " not found."); }
+        TrainingDTO trainingDto = trainingMapper.toDto(trainingDtoNoUser, user);
         Training training = trainingMapper.toEntity(trainingDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(trainingService.createTraining(training)));
+        Training savedTraining = trainingService.createTraining(training);
+        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(savedTraining));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TrainingDTO> updateTraining(@PathVariable Long id, @RequestBody TrainingNoUserDTO trainingDtoNoUser) {
         User user = null;
-        if (trainingDtoNoUser.getUser_id() != null) {
-            user = userService.getUserById(trainingDtoNoUser.getUser_id());
+        if (trainingDtoNoUser.getUserId() != null) {
+            user = userService.getUserById(trainingDtoNoUser.getUserId());
         }
-        TrainingDTO trainingDto = trainingMapper.toDtoWithUser(trainingDtoNoUser, user);
-        System.out.println(trainingDto);
+        TrainingDTO trainingDto = trainingMapper.toDto(trainingDtoNoUser, user);
         Training training = trainingMapper.toEntity(trainingDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(trainingMapper.toDto(trainingService.updateTraining(id, training)));
+        Training updatedTraining = trainingService.updateTraining(id, training);
+        return ResponseEntity.status(HttpStatus.OK).body(trainingMapper.toDto(updatedTraining));
     }
+
+    @GetMapping("/activityType")
+    public ResponseEntity<List<TrainingDTO>> getAllTrainingByActivityType(@RequestParam ActivityType activityType) {
+        List<TrainingDTO> trainingDTOS = trainingService.getAllTrainingsByActivityType(activityType).stream().map(trainingMapper::toDto).toList();
+        return ResponseEntity.ok(trainingDTOS);
+    }
+
 }

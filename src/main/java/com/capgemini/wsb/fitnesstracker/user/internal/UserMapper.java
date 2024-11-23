@@ -19,6 +19,7 @@ public class UserMapper {
 
     public User toEntity(UserDto userDto) {
         return new User(
+                        userDto.id(),
                         userDto.firstName(),
                         userDto.lastName(),
                         userDto.birthdate(),
